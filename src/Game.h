@@ -14,4 +14,5 @@ public:
 	void Loop();
 private:
 	GLFWwindow* window;
+	float aspectRatio;
 };

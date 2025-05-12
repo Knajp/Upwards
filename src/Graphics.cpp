@@ -35,10 +35,11 @@ layout(location = 0) in vec2 aPos;
 layout(location = 1) in vec2 texCoord;
 
 uniform mat4 modelMatrix;
+uniform mat4 projMatrix;
 out vec2 tCoord;
 void main()
 {
-	gl_Position = modelMatrix * vec4(aPos, 1.0);
+	gl_Position = projMatrix * modelMatrix * vec4(aPos, 0.0, 1.0);
 	tCoord = texCoord;
 }
 )";

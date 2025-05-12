@@ -14,4 +14,5 @@ public:
 	unsigned int getID();
 private:
 	unsigned int ID;
+	float aspectRatio;
 };

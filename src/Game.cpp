@@ -3,7 +3,9 @@
 #include "Platform.h"
 #include "Texture.h"
 #include <iostream>
-
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "Player.h"
 Game::Game()
 {
 	if (!glfwInit())
@@ -24,6 +26,7 @@ Game::Game()
 	
 	window = glfwCreateWindow(mode->width, mode->height, "Upwards", NULL, NULL);
 
+	aspectRatio = (float)mode->width / (float)mode->height;
 	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -33,21 +36,36 @@ Game::Game()
 }
 void Game::Loop()
 {
-	Platform ground({ -1.0f, -1.0f }, { 2.0f, 0.5f }, { 0.106f, 0.89f, 0.267f });
+	Platform ground({ -2.0f, -1.0f }, { 4.0f, 0.5f });
+	Player player;
+
 	Shader basicShader(basicVertexShaderSource, basicFragmentShaderSource);
 	Shader textureShader(textureVertexShaderSource, textureFragmentShaderSource);
 	Texture groundTexture("src/texture/ground.png");
+	Texture playerTexture("src/texture/knight.png");
 
 	glClearColor(0.137f, 0.761f, 0.941f, 1.0f);
 	glDisable(GL_CULL_FACE);
+	glUseProgram(textureShader.getID());
+
+	GLint transLoc = glGetUniformLocation(textureShader.getID(), "modelMatrix");
+	glm::mat4 projection = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+	GLint projLoc = glGetUniformLocation(textureShader.getID(), "projMatrix");
+
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glActiveTexture(GL_TEXTURE0);
+
 		glUseProgram(textureShader.getID());
 
-		ground.Render();
+		glBindTexture(GL_TEXTURE_2D, groundTexture.ID);
+		ground.Render(transLoc);
 
+		glBindTexture(GL_TEXTURE_2D, playerTexture.ID);
+		player.Render(transLoc);
 
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
 			glfwSetWindowShouldClose(window, true);
